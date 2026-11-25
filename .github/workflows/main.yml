@@ -1,0 +1,33 @@
+name: Record Radio Stream
+
+on:
+  workflow_dispatch:
+    inputs:
+      stream_url:
+        description: 'رابط البث المباشر (Stream URL)'
+        required: true
+        type: string
+      duration:
+        description: 'مدة التسجيل (ساعات:دقائق:ثواني - مثال: 00:30:00)'
+        required: true
+        default: '00:30:00'
+        type: string
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Record Audio Stream
+        run: |
+          DATE=$(date +'%Y-%m-%d_%H-%M')
+          ffmpeg -i "${{ github.event.inputs.stream_url }}" -t "${{ github.event.inputs.duration }}" -c:a libmp3lame -b:a 192k -ar 48000 "recording_${DATE}.mp3"
+
+      - name: Upload Recording
+        uses: actions/upload-artifact@v4
+        with:
+          name: radio-recording-${{ github.run_number }}
+          path: "*.mp3"
+          retention-days: 14
