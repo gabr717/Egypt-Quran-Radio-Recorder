@@ -13,6 +13,9 @@ on:
         default: '00:30:00'
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   record:
     runs-on: ubuntu-latest
@@ -24,6 +27,7 @@ jobs:
         run: |
           DATE=$(date +'%Y-%m-%d_%H-%M')
           ffmpeg -i "${{ github.event.inputs.stream_url }}" -t "${{ github.event.inputs.duration }}" -c:a flac -ar 48000 "recording_${DATE}.flac"
+          echo "FILE=recording_${DATE}.flac" >> $GITHUB_ENV
 
       - name: Upload Recording
         uses: actions/upload-artifact@v4
@@ -31,3 +35,11 @@ jobs:
           name: radio-recording-${{ github.run_number }}
           path: "*.flac"
           retention-days: 14
+
+      - name: Publish Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="rec-${{ github.run_number }}"
+          gh release create "$TAG" "$FILE" --title "Recording $TAG" --notes "Direct link: https://github.com/${{ github.repository }}/releases/download/$TAG/$FILE" --latest
+          echo "Direct link: https://github.com/${{ github.repository }}/releases/download/$TAG/$FILE" >> $GITHUB_STEP_SUMMARY
