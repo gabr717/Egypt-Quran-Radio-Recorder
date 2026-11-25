@@ -23,11 +23,11 @@ jobs:
       - name: Record Audio Stream
         run: |
           DATE=$(date +'%Y-%m-%d_%H-%M')
-          ffmpeg -i "${{ github.event.inputs.stream_url }}" -t "${{ github.event.inputs.duration }}" -c:a libmp3lame -b:a 192k -ar 48000 "recording_${DATE}.mp3"
+          ffmpeg -i "${{ github.event.inputs.stream_url }}" -t "${{ github.event.inputs.duration }}" -c:a flac -ar 48000 "recording_${DATE}.flac"
 
       - name: Upload Recording
         uses: actions/upload-artifact@v4
         with:
           name: radio-recording-${{ github.run_number }}
-          path: "*.mp3"
+          path: "*.flac"
           retention-days: 14
