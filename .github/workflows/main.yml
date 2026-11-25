@@ -39,6 +39,7 @@ jobs:
       - name: Publish Release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           TAG="rec-${{ github.run_number }}"
           gh release create "$TAG" "$FILE" --title "Recording $TAG" --notes "Direct link: https://github.com/${{ github.repository }}/releases/download/$TAG/$FILE" --latest
